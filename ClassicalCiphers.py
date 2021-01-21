@@ -69,13 +69,15 @@ class playfair:
             if (plain[i]==plain[i+1]):
                 padded= padded[:i+pad+1] + 'x' + padded[i+pad+1:]
                 pad+=1
+        if (len(padded)%2 != 0 ):
+                   padded= padded+'x'
         return padded        
                 
 
              
 x=playfair()
 print(x.playfairmatrix("MONARCHY"))
-print(x.pad("aaaabccacca"))
+print(x.pad("aab"))
 #print(x.samerow("i","k"))  
 #print(x.samecol("f","o"))  
 
