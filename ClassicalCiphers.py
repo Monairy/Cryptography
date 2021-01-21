@@ -62,13 +62,22 @@ class playfair:
           return 1
       return 0
 
-  def encrypt(self,plain):
+ def pad(self,plain):
+        padded=plain
+        pad=0
+        for i in range(len(plain)-1):
+            if (plain[i]==plain[i+1]):
+                padded= padded[:i+pad+1] + 'x' + padded[i+pad+1:]
+                pad+=1
+        return padded        
+                
 
              
 x=playfair()
-print(x.playfairmatrix("MONARCHY"))  
-print(x.samerow("i","k"))  
-print(x.samecol("f","o"))  
+print(x.playfairmatrix("MONARCHY"))
+print(x.pad("aaaabccacca"))
+#print(x.samerow("i","k"))  
+#print(x.samecol("f","o"))  
 
 #print(caeser(0,"aBc"))
 
