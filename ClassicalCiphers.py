@@ -27,8 +27,8 @@ class playfair:
  matrix = list()
          
  def playfairmatrix(self,key):
-    x=0
     key=key.lower()
+    x=0
     for i in range(len(key)):
            if key[i] == ' ':
                       continue
@@ -62,10 +62,13 @@ class playfair:
           return 1
       return 0
 
+  def encrypt(self,plain):
+
+             
 x=playfair()
 print(x.playfairmatrix("MONARCHY"))  
 print(x.samerow("i","k"))  
-print(x.samerow("i","k"))  
+print(x.samecol("f","o"))  
 
 #print(caeser(0,"aBc"))
 
