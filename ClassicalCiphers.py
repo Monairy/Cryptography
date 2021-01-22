@@ -118,17 +118,37 @@ class playfair:
                       c1=self.getmapgeneral(p1,p2)
                       c2=self.getmapgeneral(p2,p1)
              cipher+=c1+c2 
-         return cipher              
-                      
+         return cipher
 
-             
+
+def vigenere(key,plain,mode):
+    cipher=""
+    if(mode):
+           key=key+plain
+    k=0
+    for i in range(len(plain)):
+            cipher+= caeser(ord(key[k])-97,plain[i])
+            k=k+1
+            if(k==len(key) and not mode):
+               k=0 
+    return cipher
+def vernam(key,plain):
+    cipher=""
+    key=key.upper()
+    plain=plain.upper()
+    for i in range(len(plain)):
+               #print((ord('A')-65)^(ord('D')-65))
+               
+               cipher+= chr( (ord(key[i])-65) ^ ( ord(plain[i])-65) + 65 )
+    return cipher         
 x=playfair()
 #print(x.playfairmatrix("MONARCHY"))
-print(x.encrypt("playfair example","Hide the gold in the tree stump"))
+#print(x.encrypt("playfair example","Hide the gold in the tree stump"))
 #print(x.pad("aab"))
 #print(x.samerow("i","k"))  
 #print(x.samecol("f","o"))  
-
 #print(caeser(0,"aBc"))
 
+print(vigenere("deceptive","wearediscoveredsaveyourself",0))
 
+print(vernam("SPARTANS","PXPTYRFJ"))
