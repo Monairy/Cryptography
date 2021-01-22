@@ -1,7 +1,3 @@
-#filename = input("Enter File Name: ")
-
-
-
 def caeser(key,plain): 
     cipher = str()
 
@@ -90,7 +86,7 @@ class playfair:
  def pad(self,plain):
         padded=plain
         pad=0
-        for i in range(len(plain)-1):
+        for i in range(0,len(plain)-1,2):
             if (plain[i]==plain[i+1]):
                 padded= padded[:i+pad+1] + 'x' + padded[i+pad+1:]
                 pad+=1
@@ -167,7 +163,7 @@ def hill(key,plain):
 
 x=playfair()
 #print(x.playfairmatrix("MONARCHY"))
-#print(x.encrypt("playfair example","Hide the gold in the tree stump"))
+print(x.encrypt("rats","ipmxxpzw"))
 #print(x.pad("aab"))
 #print(x.samerow("i","k"))  
 #print(x.samecol("f","o"))  
@@ -176,7 +172,54 @@ x=playfair()
 #print(vigenere("deceptive","wearediscoveredsaveyourself",0))
 
 #print(vernam("SPARTANS","PXPTYRFJ"))
-print(hill([5,17,8,3],"VVMSQFGA"))
-print(hill([2,4,12,9,1,16,7,5,3],"YGREBGHZ"))
+
+def fetchfile(path):
+     with open(path,'r') as file:
+           lines = file.readlines()
+     for i in range(len(lines)):
+           lines[i]=lines[i].split("\n")[0]
+     return lines
+
+def writefile(path,ciphers):
+     with open(path,'w') as file:
+          for cipher in ciphers:     
+             file.write(cipher+"\n")   
+
+#print(fetchfile("Input files/caesar_plain.txt"))
+             
+while(1):
+           
+  alg = input("choose algorithm 1)Caeser 2)playfair 3)hill 4)vigenere 5)vernam\n")
+  if(alg=="1"):
+    file = input("Caeser - Enter Filename: ")
+    key =  input("Caeser - Enter Key: ")
+    try:
+               os.remove('Caeser_cipher.txt')
+    except:
+               pass
+    ciphers=list()       
+    for plain in fetchfile(file):
+     ciphers.append(caeser(int(key),plain))
+     writefile('Caeser_cipher.txt',ciphers)
+
+  if(alg=="2"):
+    file = input("playfair - Enter Filename: ")
+    key =  input("playfair - Enter Key: ")
+    try:
+               os.remove('playfair_cipher.txt')
+    except:
+               pass
+    ciphers=list()       
+    for plain in fetchfile(file):
+     x=playfair()
+     print(x.encrypt(key,plain))
+     ciphers.append(x.encrypt(key,plain))
+     writefile('playfair_cipher.txt',ciphers)
+
+     
+
+
+#print(hill([5,17,8,3],"VVMSQFGA"))
+#print(hill([2,4,12,9,1,16,7,5,3],"YGREBGHZ"))
 
 
