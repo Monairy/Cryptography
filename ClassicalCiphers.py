@@ -170,7 +170,7 @@ def hill(key,plain):
 #print(x.samecol("f","o"))  
 #print(caeser(0,"aBc"))
 
-#print(vigenere("deceptive","wearediscoveredsaveyourself",0))
+#print(vigenere("pie","dbbadpez",0))
 
 #print(vernam("SPARTANS","PXPTYRFJ"))
 
@@ -185,6 +185,7 @@ def writefile(path,ciphers):
      with open(path,'w') as file:
           for cipher in ciphers:     
              file.write(cipher+"\n")   
+     print("ciphers saved at "+path+"\n")
 
 #print(fetchfile("Input files/caesar_plain.txt"))
              
@@ -200,8 +201,8 @@ while(1):
                pass
     ciphers=list()       
     for plain in fetchfile(file):
-     ciphers.append(caeser(int(key),plain))
-     writefile('Caeser_cipher.txt',ciphers)
+       ciphers.append(caeser(int(key),plain))
+    writefile('Caeser_cipher.txt',ciphers)
 
   if(alg=="2"):
     file = input("playfair - Enter Filename: ")
@@ -212,10 +213,10 @@ while(1):
                pass
     ciphers=list()       
     for plain in fetchfile(file):
-     x=playfair()
-     ciphers.append(x.encrypt(key,plain))
-     writefile('playfair_cipher.txt',ciphers)
-     
+       x=playfair()
+       ciphers.append(x.encrypt(key,plain))
+    writefile('playfair_cipher.txt',ciphers)
+ 
   if(alg=="3"):
     file = input("hill - Enter Filename: ")
     key =  input("hill - Enter Key: ")
@@ -226,11 +227,34 @@ while(1):
                pass
     ciphers=list()       
     for plain in fetchfile(file):
-     ciphers.append(hill(key,plain))
-     print(ciphers)
-     writefile('hill_cihper.txt',ciphers)
-     
+       ciphers.append(hill(key,plain))
+    writefile('hill_cihper.txt',ciphers)
 
+  if(alg=="4"):
+    file = input("vigenere - Enter Filename: ")
+    key =  input("vigenere - Enter Key: ")
+    mode =  input("vigenere - Enter mode 0)repeating 1)auto: ")
+
+    try:
+               os.remove('vigenere_cihper.txt')
+    except:
+               pass
+    ciphers=list()       
+    for plain in fetchfile(file):
+       ciphers.append(vigenere(key,plain,int(mode)))
+    writefile('vigenere_cihper.txt',ciphers)     
+     
+  if(alg=="5"):
+    file = input("vernam - Enter Filename: ")
+    key =  input("vernam - Enter Key: ")
+    try:
+               os.remove('vernam_cihper.txt')
+    except:
+               pass
+    ciphers=list()       
+    for plain in fetchfile(file):
+       ciphers.append(vernam(key,plain))
+    writefile('vernam_cihper.txt',ciphers)
 
 #print(hill([5,17,8,3],"VVMSQFGA"))
 #print(hill([2,4,12,9,1,16,7,5,3],"YGREBGHZ"))
