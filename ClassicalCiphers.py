@@ -140,7 +140,8 @@ def vernam(key,plain):
 def hill(key,plain):
     cipher=""
     plain=plain.upper()
-
+    for i in range(len(key)):
+               key[i]=int(key[i])
                
     if (len(key)==4):
       if(len(plain)%2)!=0:
@@ -161,9 +162,9 @@ def hill(key,plain):
            cipher+=chr((c1%26) + 65)+chr((c2%26) + 65)+chr((c3%26) + 65)           
     return cipher            
 
-x=playfair()
+#x=playfair()
 #print(x.playfairmatrix("MONARCHY"))
-print(x.encrypt("rats","ipmxxpzw"))
+#print(x.encrypt("rats","ipmxxpzw"))
 #print(x.pad("aab"))
 #print(x.samerow("i","k"))  
 #print(x.samecol("f","o"))  
@@ -212,10 +213,22 @@ while(1):
     ciphers=list()       
     for plain in fetchfile(file):
      x=playfair()
-     print(x.encrypt(key,plain))
      ciphers.append(x.encrypt(key,plain))
      writefile('playfair_cipher.txt',ciphers)
-
+     
+  if(alg=="3"):
+    file = input("hill - Enter Filename: ")
+    key =  input("hill - Enter Key: ")
+    key=key.split(",")
+    try:
+               os.remove('hill_cihper.txt')
+    except:
+               pass
+    ciphers=list()       
+    for plain in fetchfile(file):
+     ciphers.append(hill(key,plain))
+     print(ciphers)
+     writefile('hill_cihper.txt',ciphers)
      
 
 
