@@ -132,15 +132,39 @@ def vigenere(key,plain,mode):
             if(k==len(key) and not mode):
                k=0 
     return cipher
+
 def vernam(key,plain):
     cipher=""
     key=key.upper()
     plain=plain.upper()
     for i in range(len(plain)):
-               #print((ord('A')-65)^(ord('D')-65))
+               cipher+= chr( ((ord(key[i])-65) ^ ( ord(plain[i])-65)) + 65 )
+    return cipher
+
+def hill(key,plain):
+    cipher=""
+    plain=plain.upper()
+
                
-               cipher+= chr( (ord(key[i])-65) ^ ( ord(plain[i])-65) + 65 )
-    return cipher         
+    if (len(key)==4):
+      if(len(plain)%2)!=0:
+               plain+="X"
+      for i in range(0,len(plain),2):
+           c1=key[0]*(ord(plain[i])-65)+key[1]*(ord(plain[i+1])-65)
+           c2=key[2]*(ord(plain[i])-65)+key[3]*(ord(plain[i+1])-65)
+           cipher+=chr((c1%26) + 65)+chr((c2%26) + 65)
+    if (len(key)==9):
+      if(len(plain)%3)==1:
+               plain+="XX"
+      if(len(plain)%3)==2:
+               plain+="X"        
+      for i in range(0,len(plain),3):
+           c1=key[0]*(ord(plain[i])-65)+key[1]*(ord(plain[i+1])-65)+key[2]*(ord(plain[i+2])-65)
+           c2=key[3]*(ord(plain[i])-65)+key[4]*(ord(plain[i+1])-65)+key[5]*(ord(plain[i+2])-65)
+           c3=key[6]*(ord(plain[i])-65)+key[7]*(ord(plain[i+1])-65)+key[8]*(ord(plain[i+2])-65)
+           cipher+=chr((c1%26) + 65)+chr((c2%26) + 65)+chr((c3%26) + 65)           
+    return cipher            
+
 x=playfair()
 #print(x.playfairmatrix("MONARCHY"))
 #print(x.encrypt("playfair example","Hide the gold in the tree stump"))
@@ -149,6 +173,10 @@ x=playfair()
 #print(x.samecol("f","o"))  
 #print(caeser(0,"aBc"))
 
-print(vigenere("deceptive","wearediscoveredsaveyourself",0))
+#print(vigenere("deceptive","wearediscoveredsaveyourself",0))
 
-print(vernam("SPARTANS","PXPTYRFJ"))
+#print(vernam("SPARTANS","PXPTYRFJ"))
+print(hill([5,17,8,3],"VVMSQFGA"))
+print(hill([2,4,12,9,1,16,7,5,3],"YGREBGHZ"))
+
+
