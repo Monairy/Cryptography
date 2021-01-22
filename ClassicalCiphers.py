@@ -24,8 +24,7 @@ def caeser(key,plain):
     return cipher
 
 class playfair:
- matrix = list()
-         
+ matrix=list()
  def playfairmatrix(self,key):
     key=key.lower()
     x=0
@@ -49,8 +48,12 @@ class playfair:
                  l1="i"
       if (l2=='j'):
                  l2='i'
-      if abs(self.matrix.index(l1)-self.matrix.index(l2))<5:
-          return 1
+      index1=self.matrix.index(l1)
+      index2=self.matrix.index(l2)
+      for i in range(0,21,5):
+            if (index1<i+5 and index2<i+5):
+              if(index1>=i and index2>=i):
+                return 1
       return 0
 
  def samecol(self,l1,l2):
@@ -62,6 +65,28 @@ class playfair:
           return 1
       return 0
 
+ def getmaprow(self,letter):
+     if ((self.matrix.index(letter)+1)%5==0):
+            c = self.matrix[self.matrix.index(letter)-4]
+     else:
+           c = self.matrix[self.matrix.index(letter)+1]
+     return c
+
+ def getmapcol(self,letter):
+     if ((self.matrix.index(letter))>=20):
+            c = self.matrix[self.matrix.index(letter)-20]
+     else:
+           c = self.matrix[self.matrix.index(letter)+5]
+     return c
+
+ def getmapgeneral(self,l1,l2):
+      for i in range (len(self.matrix)):
+            if (self.samerow(l1,self.matrix[i])):
+                if (self.samecol(l2,self.matrix[i])):
+                           c = self.matrix[i]
+                           break
+      return c
+
  def pad(self,plain):
         padded=plain
         pad=0
@@ -71,17 +96,39 @@ class playfair:
                 pad+=1
         if (len(padded)%2 != 0 ):
                    padded= padded+'x'
-        return padded        
-                
+        return padded
+
+ def encrypt(self,key,plain):
+         self.playfairmatrix(key)
+         plain=plain.replace('j','i')
+         plain=plain.replace(' ', '')
+         plain=plain.lower()
+         plain=self.pad(plain)
+         cipher=""
+         for i in range(0,len(plain),2):
+             p1=plain[i]
+             p2=plain[i+1]
+             if (self.samerow(p1,p2)):
+                     c1=self.getmaprow(p1)
+                     c2=self.getmaprow(p2)
+             elif (self.samecol(p1,p2)):
+                      c1=self.getmapcol(p1)
+                      c2=self.getmapcol(p2)
+             else:
+                      c1=self.getmapgeneral(p1,p2)
+                      c2=self.getmapgeneral(p2,p1)
+             cipher+=c1+c2 
+         return cipher              
+                      
 
              
 x=playfair()
-print(x.playfairmatrix("MONARCHY"))
-print(x.pad("aab"))
+#print(x.playfairmatrix("MONARCHY"))
+print(x.encrypt("playfair example","Hide the gold in the tree stump"))
+#print(x.pad("aab"))
 #print(x.samerow("i","k"))  
 #print(x.samecol("f","o"))  
 
 #print(caeser(0,"aBc"))
 
 
- 
