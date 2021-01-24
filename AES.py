@@ -24,6 +24,11 @@ S_BOX = [
             0x89, 0x0d, 0xbf, 0xe6, 0x42, 0x68, 0x41, 0x99, 0x2d, 0x0f, 0xb0,
             0x54, 0xbb, 0x16]
 
+Mix_Col = [
+           [2,3,1,1],
+           [1,2,3,1],
+           [1,1,2,3],
+           [3,1,1,2]]
 
 def subBytes(matrix):
    out=[[],[],[],[]]
@@ -41,12 +46,48 @@ def shiftRows(matrix):
       out[row]=matrix[row][shamt:]+matrix[row][0:shamt]
       shamt+=1
 
-  return out     
+  return out
+
+
+def mixColumns(matrix):
+    out=[[],[],[],[]]
+    
+    for col_ip in range(0,4):
+               
+        currentCol=[]
+        for i in range(0,4): currentCol.append(int(matrix[i][col_ip],16))
+        
+        for row_mc in range(0,4): #row mix_col
+            cell=0
+            
+            for k in range(0,4): #col mix_col
+                       
+                if Mix_Col[row_mc][k]==1:
+                    cell= cell ^ currentCol[k]
+                    
+                elif (Mix_Col[row_mc][k]==2): #shift left 1
+                    temp=(currentCol[k]<<1) 
+                    if (temp > 0xff): #1b MSB shifted
+                        temp &= 0xff  #make temp 8 bits only
+                        temp ^= 0x1b  #xor with field polyn
+                    cell^=temp
+                    
+                elif (Mix_Col[row_mc][k]==3):  #shift left 1
+                    temp = (currentCol[k] << 1)
+                    if (temp > 0xff): #1b MSB shifted
+                        temp &= 0xff  #make temp 8 bits only
+                        temp ^= 0x1b  #xor with field polyn
+                    temp^=currentCol[k]  
+                    cell ^= temp
+                    
+            out[row_mc].append(hex(cell))
+            
+    return out
 
 arr=[['0e','ce','f2','d9'],
      ['36','72','6b','2b'],
      ['34','25','17','55'],
      ['ae','b6','4e','88']]
 
-print(shiftRows(subBytes(arr)))
+print(mixColumns(shiftRows(subBytes(arr))))
 
