@@ -18,21 +18,32 @@ PC2 = [
     44, 49, 39, 56, 34, 53,
     46, 42, 50, 36, 29, 32, ]
 
-P = [   
-    16,  7, 20, 21,
-    29, 12, 28, 17,
-     1, 15, 23, 26,
-     5, 18, 31, 10,
-     2,  8, 24, 14,
-    32, 27,  3,  9,
-    19, 13, 30,  6,
-    22, 11,  4, 25, ]
 
 shamt = [
-    1, 1, 2, 2, 
-    2, 2, 2, 2, 
-    1, 2, 2, 2, 
-    2, 2, 2, 1, ]
+     1, 1, 2, 2, 
+     2, 2, 2, 2, 
+     1, 2, 2, 2, 
+     2, 2, 2, 1, ]
+
+E = [
+    32,  1,  2,  3,  4,  5,
+     4,  5,  6,  7,  8,  9,
+     8,  9, 10, 11, 12, 13,
+    12, 13, 14, 15, 16, 17,
+    16, 17, 18, 19, 20, 21,
+    20, 21, 22, 23, 24, 25,
+    24, 25, 26, 27, 28, 29,
+    28, 29, 30, 31, 32,  1, ]
+
+
+P = [ 16,  7, 20, 21,
+      29, 12, 28, 17,
+      1, 15, 23, 26,
+      5, 18, 31, 10,
+      2,  8, 24, 14,
+     32, 27,  3,  9,
+     19, 13, 30,  6,
+     22, 11,  4, 25, ]
 
 IP = [  
     58, 50, 42, 34, 26, 18, 10,  2,
@@ -54,15 +65,7 @@ IIP = [
     34,  2, 42, 10, 50, 18, 58, 26,
     33,  1, 41,  9, 49, 17, 57, 25, ]
 
-E = [
-    32,  1,  2,  3,  4,  5,
-     4,  5,  6,  7,  8,  9,
-     8,  9, 10, 11, 12, 13,
-    12, 13, 14, 15, 16, 17,
-    16, 17, 18, 19, 20, 21,
-    20, 21, 22, 23, 24, 25,
-    24, 25, 26, 27, 28, 29,
-    28, 29, 30, 31, 32,  1, ]
+
 
 S1 = [
     [14,  4, 13,  1,  2, 15, 11,  8,  3, 10,  6, 12,  5,  9,  0,  7],
@@ -112,7 +115,7 @@ S8 = [
     [ 7, 11,  4,  1,  9, 12, 14,  2,  0,  6, 10, 13, 15,  3,  5,  8],
     [ 2,  1, 14,  7,  4, 10,  8, 13, 15, 12,  9,  0,  3,  5,  6, 11]]
 
-SN = [S1, S2, S3, S4, S5, S6, S7, S8]
+S_BOXES = [S1, S2, S3, S4, S5, S6, S7, S8]
 
 
 
@@ -134,23 +137,25 @@ def permutation2(binary):
     return result    
 
 def f(R,SK):
+           
    #expand R
     R_48 = ""
     for i in E:
          R_48+=R[i-1]
+         
     # XOR
-    #print(R_48)
     x1=int(R_48,2) ^ int(SK,2)
     x1=str(bin(x1)[2:].zfill(48))
+    
     # S Boxes
     x2=""
     boxnum=0
     for i in range(0,len(x1),6):
        row = x1[i:i+6]
-       s=SN[boxnum][int(row[0]+row[5],2)][int(row[1:5],2)]
+       s=S_BOXES[boxnum][int(row[0]+row[5],2)][int(row[1:5],2)]
        boxnum+=1
        x2+=str(format(s,'04b'))
-    print(x2)   
+
     # Permutation P
     out_f=""
     for i in P:
@@ -181,15 +186,16 @@ def genSK(key):
            sk.append(permutation2(aftershift))
      return sk       
 
-def encrypt(plain,key):
+def DES(key,plain,enc):
     plain=bin(int(plain,16))[2:].zfill(64)
     key=bin(int(key,16))[2:].zfill(64)
     plain=initial_p(plain)
     L=plain[:32]
     R=plain[32:]
     sk=genSK(key)
-    #print(L)
-    #print(f(R,sk[0]))
+    if(enc=='dec'):
+           sk.reverse()
+           
     for i in range(0,16):
           temp = R
           R = str( bin(int(L,2) ^ int(f(R,sk[i]),2)) [2:].zfill(32))
@@ -197,9 +203,17 @@ def encrypt(plain,key):
     temp=R
     R=L
     L=temp
+  
+    return (hex(int(final_p(L+R),2)))
+
     
-    #print(sk)
-    #print(final_p(L+R))
-    print(hex(int(final_p(L+R),2)))
-    
-encrypt("0123456789ABCDEF","133457799BBCDFF1")
+def DES_rounds(key,plain,rounds,enc):
+  cipher=plain         
+  for rnd in range(rounds):
+      cipher=DES(key,cipher,enc)
+      
+  return cipher
+
+
+
+print(DES_rounds("0000000000000000","FFFFFFFFFAFFFFFA",1,'enc'))
