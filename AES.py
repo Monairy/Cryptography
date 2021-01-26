@@ -90,7 +90,6 @@ def shiftRows(matrix):
       shamt+=1
   return out
 
-
 def invshiftRows(matrix):
   out=[[],[],[],[]]
   shamt=0
@@ -112,25 +111,29 @@ def mixColumns(matrix):
             
             for col_mc in range(0,4): #col mix_col
                        
-                if Mix_Col[row_mc][col_mc]==1:
-                    cell= cell ^ currentCol[col_mc]
-                    
-                elif (Mix_Col[row_mc][col_mc]==2): #shift left 1
-                    temp=(currentCol[col_mc]<<1) 
-                    if (temp > 0xff): #1b MSB shifted
-                        temp &= 0xff  #make temp 8 bits only
-                        temp ^= 0x1b  #xor with field polyn
-                    cell^=temp
-                    
-                elif (Mix_Col[row_mc][col_mc]==3):  #shift left 1
-                    temp = (currentCol[col_mc] << 1)
-                    if (temp > 0xff): #1b MSB shifted
-                        temp &= 0xff  #make temp 8 bits only
-                        temp ^= 0x1b  #xor with field polyn
-                    temp^=currentCol[col_mc]  #add self
-                    cell ^= temp
+                  cell^=galoisMult(currentCol[col_mc],Mix_Col[row_mc][col_mc])
+
                     
             out[row_mc].append('{:02x}'.format(cell))            
+    return out
+
+  
+
+def invmixColumns(matrix):
+    out=[[],[],[],[]]
+    for col_ip in range(0,4):
+               
+        currentCol=[]
+        for i in range(0,4): currentCol.append(int(matrix[i][col_ip],16))
+        
+        for row_mc in range(0,4): #row mix_col
+            cell=0
+            
+            for col_mc in range(0,4): #col mix_col
+               cell^=galoisMult(currentCol[col_mc],invMix_Col[row_mc][col_mc])
+
+            out[row_mc].append('{:02x}'.format(cell))
+            
     return out
 
 def checkoverflow(num):
@@ -147,7 +150,6 @@ def shift(num,shamt):
 
 def galoisMult(a, b):
   out=0
- #5 print(a,b)
   a=str(bin(a)[2:].zfill(8))
   shamt=1   
   for i in range(len(a)-2,-1,-1):
@@ -157,34 +159,7 @@ def galoisMult(a, b):
       
   if(a[len(a)-1]=='1'):
      out = out ^ b
-  #print(a,b,out)   
   return out
-  
-#a=galoisMult(14,49)^galoisMult(11,162)^galoisMult(13,64)^galoisMult(9,203)
-#print(a)
-
-#a^=galoisMult(3,137)
-#a^=galoisMult(1,171)
-#a^=galoisMult(1,205)
-
-def invmixColumns(matrix):
-    out=[[],[],[],[]]
-    for col_ip in range(0,4):
-               
-        currentCol=[]
-        for i in range(0,4): currentCol.append(int(matrix[i][col_ip],16))
-        
-        for row_mc in range(0,4): #row mix_col
-            cell=0
-            
-            for col_mc in range(0,4): #col mix_col
-               #print(invMix_Col[row_mc][col_mc] , currentCol[col_mc])      
-               cell^=galoisMult(currentCol[col_mc],invMix_Col[row_mc][col_mc])
-
-            #print(cell)       
-            out[row_mc].append('{:02x}'.format(cell))
-            
-    return out
 
 def addRoundKey(matrix,key):
    out=[[],[],[],[]]
@@ -244,15 +219,16 @@ def keyExpansion(key,rnd):
 
 def encrypt(plainMatrix,keyMatrix):
    cipher=addRoundKey(plainMatrix,keyMatrix)
-  
+
    for rnd in range(1,11):
       keyMatrix=keyExpansion(keyMatrix,rnd)
       if (rnd==10):
           cipher=addRoundKey(shiftRows(subBytes(cipher)),keyMatrix)
+          break
       else:   
           cipher=addRoundKey(mixColumns(shiftRows(subBytes(cipher))),keyMatrix)
-
-   print(cipher)
+      
+   return(cipher)
 
 
 def decrypt(cipherMatrix,keyMatrix):
@@ -262,11 +238,9 @@ def decrypt(cipherMatrix,keyMatrix):
    
    for rnd in range(1,11):
          keyMatrix= keyExpansion(keyMatrix,rnd)
-         #print(keyMatrix,"\n")
          allkeys.append(keyMatrix)
 
    plain=addRoundKey(cipherMatrix,allkeys[10])
-   print(plain)
    
 
    for rnd in range(1,11):
@@ -275,11 +249,10 @@ def decrypt(cipherMatrix,keyMatrix):
           plain=invshiftRows(plain)
           plain=addRoundKey(invsubBytes(plain),keyMatrix)
           plain = invmixColumns(plain)
-
       else:
           plain=addRoundKey(invsubBytes(invshiftRows(plain)),allkeys[0])
-
-   print(plain)
+          
+   return (plain)
    
 arr=[['01','89','fe','76'],
      ['23','ab','dc','54'],
@@ -291,14 +264,47 @@ roundKey=[['0f','47','0c','af'],
           ['71','e8','ad','67'],
           ['c9','59','d6','98']]
 
-#encrypt(arr,roundKey)
+arr2=[['01','23','45','67'],
+     ['89','ab','cd','ef'],
+     ['01','23','45','67'],
+     ['89','ab','cd','ef']]
+
+#encrypt(arr2,arr2)
 
 cipher=[['ff', '08', '69', '64'],
         ['0b', '53', '34', '14'],
         ['84', 'bf', 'ab', '8f'],
         ['4a', '7c', '43', 'b9']]
 
-decrypt(cipher,roundKey)
+#decrypt(roundKey,roundKey)
+           
+def main():
+  key=input()
+  plain=input()
+
+  keyMatrix=[[],[],[],[]]
+  plainMatrix=[[],[],[],[]]
+  row=0
+  for i in range(0,31,2):          
+     keyMatrix[row].append(key[i]+key[i+1])
+     plainMatrix[row].append(plain[i]+plain[i+1])
+     row+=1
+     if(row==4):
+       row=0
+       
+  cipher=encrypt(plainMatrix,keyMatrix)
+  
+  cipherstring=""
+
+  for col in range(0,4):
+       for row in range(0,4):
+            cipherstring+=cipher[row][col]      
+
+  print(cipherstring)
+
+main()
+  
+#decrypt(cipher,roundKey)
 #keyExpansion(roundKey,2)
 
 #print(addRoundKey(mixColumns(shiftRows(subBytes(arr))),roundKey))
