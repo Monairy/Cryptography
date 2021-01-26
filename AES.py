@@ -279,8 +279,8 @@ cipher=[['ff', '08', '69', '64'],
 #decrypt(roundKey,roundKey)
            
 def main():
-  key=input()
-  plain=input()
+  key=input("Enter Key \n")
+  plain=input("Enter Plaintext \n")
 
   keyMatrix=[[],[],[],[]]
   plainMatrix=[[],[],[],[]]
@@ -300,7 +300,7 @@ def main():
        for row in range(0,4):
             cipherstring+=cipher[row][col]      
 
-  print(cipherstring)
+  print("Ciphertext is: \n",cipherstring)
 
 main()
   
