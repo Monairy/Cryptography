@@ -30,13 +30,15 @@ Mix_Col = [
            [1,1,2,3],
            [3,1,1,2]]
 
+R_CON=[0x1,0x2,0x4,0x8,0x10,0x20,0x40,0x80,0x1b,0x36]
+
 def subBytes(matrix):
    out=[[],[],[],[]]
    for row in range(0,4):
     for col in range(0,4):
         cell=matrix[row][col]
         index=int(cell[0],16)*16 + int(cell[1],16)
-        out[row].append(hex(S_BOX[index]))
+        out[row].append('{:02x}'.format(S_BOX[index]))
    return out
 
 def shiftRows(matrix):
@@ -60,34 +62,111 @@ def mixColumns(matrix):
         for row_mc in range(0,4): #row mix_col
             cell=0
             
-            for k in range(0,4): #col mix_col
+            for col_mc in range(0,4): #col mix_col
                        
-                if Mix_Col[row_mc][k]==1:
-                    cell= cell ^ currentCol[k]
+                if Mix_Col[row_mc][col_mc]==1:
+                    cell= cell ^ currentCol[col_mc]
                     
-                elif (Mix_Col[row_mc][k]==2): #shift left 1
-                    temp=(currentCol[k]<<1) 
+                elif (Mix_Col[row_mc][col_mc]==2): #shift left 1
+                    temp=(currentCol[col_mc]<<1) 
                     if (temp > 0xff): #1b MSB shifted
                         temp &= 0xff  #make temp 8 bits only
                         temp ^= 0x1b  #xor with field polyn
                     cell^=temp
                     
-                elif (Mix_Col[row_mc][k]==3):  #shift left 1
-                    temp = (currentCol[k] << 1)
+                elif (Mix_Col[row_mc][col_mc]==3):  #shift left 1
+                    temp = (currentCol[col_mc] << 1)
                     if (temp > 0xff): #1b MSB shifted
                         temp &= 0xff  #make temp 8 bits only
                         temp ^= 0x1b  #xor with field polyn
-                    temp^=currentCol[k]  
+                    temp^=currentCol[col_mc]  #add self
                     cell ^= temp
                     
-            out[row_mc].append(hex(cell))
+            out[row_mc].append('{:02x}'.format(cell))
             
     return out
 
-arr=[['0e','ce','f2','d9'],
-     ['36','72','6b','2b'],
-     ['34','25','17','55'],
-     ['ae','b6','4e','88']]
+def addRoundKey(matrix,key):
+   out=[[],[],[],[]]
 
-print(mixColumns(shiftRows(subBytes(arr))))
+   for col in range(0,4):
+       matrixCol=[]
+       keyCol=[]
+       
+       for row in range(0,4):#generate col
+           matrixCol.append(int(matrix[row][col],16))
+           keyCol.append(int(key[row][col],16))
+           
+       for i in range(0,4):
+            xor= matrixCol[i] ^ keyCol[i]
+            out[i].append('{:02x}'.format(xor)) #append to each row list
+
+   return out         
+
+def getCol(matrix,colindex):#get Col as HexaDecimal
+   matrixCol=[]
+   for row in range(0,4):#generate col
+       matrixCol.append(matrix[row][colindex])
+   return matrixCol 
+
+
+def keyExpansion(key,rnd):         
+    out=[[],[],[],[]]
+    
+    for colNew in range(0,4):
+      wi_4=getCol(key,colNew)
+
+      if(colNew==0):
+        wi_1=getCol(key,3)
+      else:
+        wi_1=getCol(out,colNew-1)
+        
+      #print(wi_1)
+
+      if(colNew==0):
+        wi_1=wi_1[1:]+wi_1[:1]  #rot
+        for i in range(0,4): #sBOX
+          val=wi_1[i]
+          index=int(val[0],16)*16 + int(val[1],16)
+          wi_1[i]='{:02x}'.format(S_BOX[index])
+      
+      w=list()
+      for i in range(0,4):
+       xor= int(wi_4[i],16) ^ int(wi_1[i],16)
+       if(i==0 and colNew==0):
+           xor = xor  ^ R_CON[rnd-1]
+       w.append('{:02x}'.format(xor))
+      
+     
+      for rowNew in range(0,4):  
+        out[rowNew].append(w[rowNew])
+    return(out)
+    #print(out)
+
+def encrypt(plainMatrix,keyMatrix):
+   cipher=addRoundKey(plainMatrix,keyMatrix)
+  
+   for rnd in range(1,11):
+      keyMatrix=keyExpansion(keyMatrix,rnd)
+      if (rnd==10):
+          cipher=addRoundKey(shiftRows(subBytes(cipher)),keyMatrix)
+      else:   
+          cipher=addRoundKey(mixColumns(shiftRows(subBytes(cipher))),keyMatrix)
+
+   print(cipher)
+
+arr=[['01','89','fe','76'],
+     ['23','ab','dc','54'],
+     ['45','cd','ba','32'],
+     ['67','ef','98','10']]
+
+roundKey=[['0f','47','0c','af'],
+          ['15','d9','b7','7f'],
+          ['71','e8','ad','67'],
+          ['c9','59','d6','98']]
+
+encrypt(arr,roundKey)
+#keyExpansion(roundKey,2)
+
+#print(addRoundKey(mixColumns(shiftRows(subBytes(arr))),roundKey))
 
