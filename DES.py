@@ -214,6 +214,9 @@ def DES_rounds(key,plain,rounds,enc):
       
   return cipher
 
+key=input()
+plain=input()
+rounds=input()
 
 
-print(DES_rounds("0000000000000000","FFFFFFFFFAFFFFFA",1,'enc'))
+print(DES_rounds(key,plain,int(rounds),'enc')[2:])
